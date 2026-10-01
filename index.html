@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context Engineering — 0 → Mastery Checklist</title>
+<meta name="description" content="A local-first study checklist for the Context Engineering / Enterprise AI curriculum.">
+<style>
+:root{
+  --bg:#f6f7fb;--surface:#fff;--surface-2:#f1f3f7;--text:#15171a;--muted:#6d7280;--border:#e3e6ec;
+  --accent:#5b5bd6;--accent-2:#ececff;--good:#15803d;--good-bg:#eaf8ef;--warn:#a16207;--warn-bg:#fff7df;
+  --danger:#b42318;--danger-bg:#fff0ee;--shadow:0 10px 35px rgba(20,23,30,.07);--radius:16px;
+  --font:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:var(--font);background:var(--bg);color:var(--text)}
+button,input,select{font:inherit} button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.app{min-height:100vh;display:grid;grid-template-columns:280px 1fr}
+.sidebar{position:sticky;top:0;height:100vh;border-right:1px solid var(--border);background:var(--surface);padding:20px 16px;display:flex;flex-direction:column;gap:16px;overflow:auto}
+.brand{display:flex;gap:12px;align-items:center;padding:6px 8px 10px}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:var(--text);color:#fff;display:grid;place-items:center;font-weight:800}
+.brand h1{font-size:15px;line-height:1.1;margin:0}.brand p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:10px;color:var(--muted);font-weight:650}.nav button.active,.nav button:hover{background:var(--surface-2);color:var(--text)}
+.sidebar-card{border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--surface-2);margin-top:auto}.sidebar-card strong{font-size:12px;display:block;margin-bottom:6px}.sidebar-card p{font-size:11px;color:var(--muted);line-height:1.45;margin:0}
+.main{min-width:0}.topbar{position:sticky;top:0;z-index:10;background:rgba(246,247,251,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px}.topbar-left{display:flex;align-items:center;gap:10px;min-width:0}.page-title{font-size:17px;font-weight:800;white-space:nowrap}.save-state{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.toolbar{display:flex;gap:8px;align-items:center}.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 12px;border-radius:10px;font-weight:700;font-size:12px}.btn:hover{border-color:#cdd2dc;background:#fbfbfd}.btn.primary{border-color:var(--accent);background:var(--accent);color:#fff}.btn.ghost{background:transparent}.btn.small{font-size:11px;padding:6px 9px}
+.content{padding:24px;max-width:1450px;margin:auto}.view{display:none}.view.active{display:block}
+.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:20px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}.hero h2{font-size:32px;letter-spacing:-.035em;line-height:1.05;margin:7px 0 10px}.hero p{max-width:760px;color:var(--muted);font-size:14px;line-height:1.55;margin:0}
+.grid{display:grid;gap:14px}.grid.cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.grid.two{grid-template-columns:minmax(0,2fr) minmax(320px,1fr)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}.stat{padding:16px}.stat .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.stat .value{font-size:27px;font-weight:850;margin-top:8px}.stat .sub{font-size:11px;color:var(--muted);margin-top:5px}
+.progress{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}.progress > i{display:block;height:100%;background:var(--accent);border-radius:inherit;width:0}
+.panel{padding:16px}.panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.panel-title{font-size:14px;font-weight:850}.muted{color:var(--muted);font-size:12px}
+.today-list,.queue{display:grid;gap:8px}.lesson-mini{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border:1px solid var(--border);border-radius:12px}.lesson-mini-main{display:flex;align-items:center;gap:10px;min-width:0}.lesson-mini .num{width:24px;height:24px;border-radius:7px;background:var(--surface-2);display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--muted);flex:0 0 auto}.lesson-mini .name{font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lesson-mini .meta{font-size:10px;color:var(--muted);margin-top:2px}.status-dot{width:8px;height:8px;border-radius:50%;background:#cbd0d8}.status-dot.in-progress{background:var(--warn)}.status-dot.completed{background:var(--good)}
+.level-row{padding:13px 0;border-top:1px solid var(--border)}.level-row:first-child{border-top:0}.level-top{display:flex;justify-content:space-between;gap:12px;align-items:center}.level-name{font-size:12px;font-weight:800}.level-count{font-size:10px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{font-size:10px;border:1px solid var(--border);border-radius:99px;padding:4px 7px;color:var(--muted);background:var(--surface)}.chip.core{border-color:#c9c8fb;background:var(--accent-2);color:#4745ad}.chip.secondary{background:var(--warn-bg);border-color:#f3d68b;color:var(--warn)}.chip.optional{background:var(--surface-2)}.chip.special{background:#fff0ff;border-color:#e4b8e7;color:#7a2d7d}
+.filters{display:grid;grid-template-columns:minmax(240px,1fr) repeat(4,minmax(130px,180px));gap:8px;margin-bottom:14px}.field{border:1px solid var(--border);background:var(--surface);padding:10px 11px;border-radius:11px;outline:none;font-size:12px}.field:focus{border-color:#aeadf5;box-shadow:0 0 0 3px #ededff}
+.level-card{margin-bottom:12px;overflow:hidden}.level-card > .level-header{padding:15px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}.level-card .level-body{padding:0 10px 8px}.level-label{font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}.level-card h3{margin:3px 0 0;font-size:16px}.lesson{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 8px;border-bottom:1px solid var(--border)}.lesson:last-child{border-bottom:0}.check{width:24px;height:24px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;color:transparent;font-size:13px;font-weight:900}.check.done{background:var(--good);color:#fff;border-color:var(--good)}.check.partial{background:var(--warn-bg);color:var(--warn);border-color:#f1d37a}
+.lesson-main{min-width:0}.lesson-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.lesson-title{font-size:13px;font-weight:800}.lesson-summary{font-size:11px;color:var(--muted);line-height:1.4;margin-top:3px;max-width:900px}.lesson-meta{font-size:10px;color:var(--muted);margin-top:4px}.lesson-actions{display:flex;gap:6px;align-items:center}.status-select{min-width:118px}.icon-btn{width:32px;height:32px;border:1px solid var(--border);background:var(--surface);border-radius:9px;display:grid;place-items:center;color:var(--muted)}.icon-btn:hover{color:var(--text);background:var(--surface-2)}
+.drawer{position:fixed;inset:0;display:none;z-index:40}.drawer.open{display:block}.drawer-backdrop{position:absolute;inset:0;background:rgba(20,23,30,.35)}.drawer-panel{position:absolute;right:0;top:0;height:100%;width:min(660px,100%);background:var(--surface);box-shadow:-20px 0 50px rgba(0,0,0,.18);overflow:auto}.drawer-head{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px;display:flex;justify-content:space-between;gap:12px;z-index:2}.drawer-body{padding:18px}.drawer h3{font-size:22px;margin:0 0 8px}.drawer p{font-size:13px;color:var(--muted);line-height:1.6}.section{border-top:1px solid var(--border);padding-top:14px;margin-top:14px}.link-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}.link-row:last-child{border-bottom:0}.link-row span{font-size:12px}.link-row a{font-size:11px;color:var(--accent);font-weight:750;word-break:break-all}.review-table{width:100%;border-collapse:collapse;font-size:11px}.review-table th,.review-table td{padding:9px 6px;text-align:left;border-bottom:1px solid var(--border)}
+.empty{padding:28px;color:var(--muted);text-align:center;border:1px dashed var(--border);border-radius:12px;font-size:12px}
+.notice{padding:12px 14px;border-radius:12px;font-size:12px;line-height:1.5;margin-bottom:14px}.notice.info{background:var(--accent-2);border:1px solid #d8d8ff}.notice.warn{background:var(--warn-bg);border:1px solid #f0d68b}.notice.good{background:var(--good-bg);border:1px solid #bfe7cb}.notice.danger{background:var(--danger-bg);border:1px solid #f2c4be}
+.modal{position:fixed;inset:0;display:none;z-index:50}.modal.open{display:block}.modal-bg{position:absolute;inset:0;background:rgba(20,23,30,.35)}.modal-card{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 24px));background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.22);padding:18px}.modal-card h3{margin:0 0 8px}.modal-card p{font-size:12px;color:var(--muted);line-height:1.5}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.kbd{font-size:10px;border:1px solid var(--border);padding:2px 5px;border-radius:5px;background:var(--surface-2);color:var(--muted)}
+@media (max-width:1100px){.app{grid-template-columns:220px 1fr}.grid.cards{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr 1fr}.grid.two{grid-template-columns:1fr}}
+@media (max-width:760px){.app{display:block}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border)}.nav{grid-template-columns:repeat(3,1fr)}.sidebar-card{display:none}.topbar{position:static;padding:12px 14px}.content{padding:14px}.hero{display:block}.toolbar{margin-top:10px}.filters{grid-template-columns:1fr 1fr}.lesson{grid-template-columns:30px minmax(0,1fr)}.lesson-actions{grid-column:2;justify-content:flex-start}.page-title{font-size:15px}.grid.cards{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.grid.cards{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.nav{grid-template-columns:1fr 1fr}.toolbar .optional{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">CE</div><div><h1>Context Engineering</h1><p>0 → Mastery Checklist</p></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-card"><strong>Local-first storage</strong><p>Your progress is kept in a JSON file you choose. The app stores the file handle in IndexedDB and the file name in localStorage so it can restore the file without asking again when browser permissions persist.</p></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left"><div class="page-title" id="pageTitle">Curriculum</div><div class="save-state" id="saveState">Not connected</div></div>
+      <div class="toolbar">
+        <button class="btn small optional" id="openFileBtn">Open JSON</button>
+        <button class="btn small primary" id="createFileBtn">Create / Save JSON</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="view active" id="view-curriculum">
+        <div class="hero"><div><div class="eyebrow">Study path</div><h2>Context Engineering — 0 → Mastery</h2><p>A curriculum-first checklist assembled from the provided Atlan source map. Each lesson keeps its associated article links, ChatGPT map, and source-derived summary.</p></div><div class="chips"><span class="chip core">CORE</span><span class="chip secondary">DEEPEN</span><span class="chip optional">OPTIONAL</span><span class="chip special">SPECIALIZATION</span></div></div>
+        <div id="fileNotice"></div>
+        <div class="filters">
+          <input id="searchInput" class="field" placeholder="Search lessons, topics, summaries…">
+          <select id="trackFilter" class="field"><option value="">All tracks</option></select>
+          <select id="tierFilter" class="field"><option value="">All tiers</option><option>Core</option><option>Deepen</option><option>Optional</option><option>Specialization</option></select>
+          <select id="statusFilter" class="field"><option value="">All status</option><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="completed">Completed</option></select>
+          <select id="reviewFilter" class="field"><option value="">All review states</option><option value="due">Review due</option><option value="upcoming">Review upcoming</option><option value="done">All reviews done</option></select>
+        </div>
+        <div id="curriculumRoot"></div>
+      </section>
+
+      <section class="view" id="view-dashboard">
+        <div class="hero"><div><div class="eyebrow">Dashboard</div><h2>Keep moving through the path.</h2><p>The daily target is fixed at <strong>3 lessons</strong>. Reviews are generated automatically for day 2, day 7, and day 30 after completion.</p></div></div>
+        <div class="grid cards" id="statGrid"></div>
+        <div class="grid two">
+          <div class="card panel"><div class="panel-header"><div class="panel-title">Today's study session</div><div class="muted" id="todayCount"></div></div><div id="todaySession"></div></div>
+          <div class="card panel"><div class="panel-header"><div class="panel-title">Reviews</div><button class="btn small" id="openReviewBtn">Open review queue</button></div><div id="reviewPreview"></div></div>
+        </div>
+        <div class="card panel" style="margin-top:14px"><div class="panel-header"><div class="panel-title">Progress by track</div><div class="muted">completed / lessons</div></div><div id="trackProgress"></div></div>
+      </section>
+
+      <section class="view" id="view-reviews">
+        <div class="hero"><div><div class="eyebrow">Review queue</div><h2>Day 2 · Day 7 · Day 30</h2><p>Completion date is the anchor. Review dates are calculated from that completion date and remain attached to the lesson.</p></div></div>
+        <div class="card panel"><div class="panel-header"><div class="panel-title">Due / upcoming reviews</div><div class="muted" id="reviewCount"></div></div><div id="reviewsRoot"></div></div>
+      </section>
+
+      <section class="view" id="view-storage">
+        <div class="hero"><div><div class="eyebrow">Storage</div><h2>Your progress file</h2><p>Native browser File System Access API. The exact filesystem path is intentionally not exposed by browsers; this app stores the selected handle in IndexedDB and the last file name in localStorage, then attempts to restore access automatically.</p></div></div>
+        <div id="storageRoot"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="drawer" id="drawer"><div class="drawer-backdrop" id="drawerBackdrop"></div><aside class="drawer-panel"><div class="drawer-head"><div><div class="eyebrow">Lesson</div><div id="drawerTitle" style="font-weight:850"></div></div><button class="icon-btn" id="drawerClose">×</button></div><div class="drawer-body" id="drawerBody"></div></aside></div>
+
+<div class="modal" id="confirmModal"><div class="modal-bg" id="modalBg"></div><div class="modal-card"><h3 id="modalTitle">Confirm</h3><p id="modalText"></p><div class="modal-actions"><button class="btn" id="modalCancel">Cancel</button><button class="btn primary" id="modalConfirm">Continue</button></div></div></div>
+
+<script>
+'use strict';
+
+const CHATGPT_MAP = 'https://chatgpt.com/share/6abded2f-f9fc-83e8-a0c4-59211036f314';
+const DAILY_TARGET = 3;
+const DB_NAME = 'context-engineering-checklist';
+const DB_STORE = 'handles';
+const DB_KEY = 'progress-handle';
+const PATH_KEY = 'progress-file-name';
+const VERSION = 1;
+
+const lessons = [
+/* 1. FOUNDATIONS */
+{t:'Foundations',n:'01',title:'What Is a Large Language Model?',tier:'Core',summary:'Build the mental model of training data, model weights, inference, context window, and output. The source uses this to anchor everything that follows.',links:[['What Is a Large Language Model?','https://atlan.com/know/what-is-a-large-language-model/']]},
+{t:'Foundations',n:'02',title:'Are LLMs Stateless?',tier:'Core',summary:'Understand the model/application distinction: continuity is generally created by the surrounding application reintroducing prior context.',links:[['Are LLMs Stateless?','https://atlan.com/know/are-llms-stateless/']]},
+{t:'Foundations',n:'03',title:'LLM Context Window Limitations',tier:'Core',summary:'Understand why the context window is a finite working area and why context selection matters before context engineering.',links:[['LLM Context Window Limitations','https://atlan.com/know/llm-context-window-limitations/']]},
+{t:'Foundations',n:'04',title:'What Is Prompt Engineering?',tier:'Core',summary:'Learn instructions, context, constraints, and desired output, then recognize where prompt engineering stops scaling and context engineering begins.',links:[['What Is Prompt Engineering?','https://atlan.com/know/what-is-prompt-engineering/']]},
+{t:'Foundations',n:'05',title:'Context Engineering vs Prompt Engineering',tier:'Core',summary:'Separate the instruction problem from the broader problem of supplying the information, state, knowledge, constraints, and tools an agent receives.',links:[['Context Engineering vs Prompt Engineering','https://atlan.com/know/context-engineering-vs-prompt-engineering/']]},
+{t:'Foundations',n:'06',title:'What Are Embeddings?',tier:'Core',summary:'Understand text → embedding model → vector → vector similarity → relevant information. This is the foundation for semantic search and RAG.',links:[['What Are Embeddings?','https://atlan.com/know/what-are-embeddings-ai-search/']]},
+{t:'Foundations',n:'07',title:'LLM Hallucinations',tier:'Core',summary:'Understand the gap between plausible generation and authoritative information. This motivates grounding, retrieval, and context infrastructure.',links:[['LLM Hallucinations','https://atlan.com/know/llm-hallucinations/']]},
+{t:'Foundations',n:'08',title:'Prompt Engineering for Data Retrieval',tier:'Deepen',summary:'Connect prompt design to data retrieval instead of treating prompts as generic chat instructions.',links:[['Prompt Engineering for Data Retrieval','https://atlan.com/know/prompt-engineering-for-data-retrieval/']]},
+{t:'Foundations',n:'09',title:'What Is Context Engineering?',tier:'Core',summary:'Establish context engineering as the discipline of deciding what information, state, knowledge, constraints, and tools an AI system receives.',links:[['What Is Context Engineering?','https://atlan.com/know/what-is-context-engineering/']]},
+{t:'Foundations',n:'10',title:'Context Engineering for AI Agents',tier:'Core',summary:'Connect context engineering directly to agents: what an agent sees and uses is broader than a system prompt.',links:[['Context Engineering for AI Agents','https://atlan.com/know/context-engineering-for-ai-agents/']]},
+/* 2. KNOWLEDGE + CONTEXT SUBSTRATE */
+{t:'Context Substrate',n:'11',title:'What Is RAG?',tier:'Core',summary:'Learn the basic architecture: query → retrieval → relevant context → LLM → answer. RAG supplies external information at inference time.',links:[['What Is RAG?','https://atlan.com/know/what-is-rag/'],['Retrieval-Augmented Generation','https://atlan.com/know/what-is-retrieval-augmented-generation/']]},
+{t:'Context Substrate',n:'12',title:'RAG Accuracy Problems',tier:'Core',summary:'Understand why naive RAG can fail through retrieval quality, chunking, missing context, irrelevant retrieval, and stale information.',links:[['RAG Accuracy Problems','https://atlan.com/know/rag-accuracy-problems/']]},
+{t:'Context Substrate',n:'13',title:'Hybrid RAG',tier:'Deepen',summary:'Combine semantic vector retrieval with keyword retrieval. The source highlights dense retrieval + sparse retrieval + fusion.',links:[['Hybrid RAG','https://atlan.com/know/hybrid-rag/']]},
+{t:'Context Substrate',n:'14',title:'Advanced RAG Techniques',tier:'Deepen',summary:'Move beyond basic RAG into advanced retrieval, chunking, and generation techniques after the foundational retrieval model is clear.',links:[['Advanced RAG Techniques','https://atlan.com/know/advanced-rag-techniques/']]},
+{t:'Context Substrate',n:'15',title:'LLM Knowledge Base vs RAG',tier:'Core',summary:'Keep the distinction straight: a knowledge base is an information repository; RAG is the retrieval mechanism; the LLM is the reasoning/generation engine.',links:[['LLM Knowledge Base vs RAG','https://atlan.com/know/llm-knowledge-base-vs-rag/']]},
+{t:'Context Substrate',n:'16',title:'What Is an LLM Knowledge Base?',tier:'Core',summary:'Think of the knowledge base as stored documents, metadata, definitions, embeddings, and relationships that can feed retrieval.',links:[['What Is an LLM Knowledge Base?','https://atlan.com/know/what-is-an-llm-knowledge-base/']]},
+{t:'Context Substrate',n:'17',title:'Knowledge Base Data Preparation',tier:'Core',summary:'Learn how raw information becomes AI-consumable information before indexing and retrieval.',links:[['Knowledge Base Data Preparation','https://atlan.com/know/knowledge-base-data-preparation-llm/']]},
+{t:'Context Substrate',n:'18',title:'How to Build an LLM Knowledge Base',tier:'Core',summary:'Follow the source sequence: audit data, define scope, connect governed sources, choose architecture, prepare/index data, and monitor freshness and quality.',links:[['How to Build an LLM Knowledge Base','https://atlan.com/know/how-to-build-llm-knowledge-base/']]},
+{t:'Context Substrate',n:'19',title:'Enterprise LLM Knowledge Base',tier:'Deepen',summary:'Move from a small RAG system to enterprise knowledge infrastructure.',links:[['Enterprise LLM Knowledge Base','https://atlan.com/know/enterprise-llm-knowledge-base/']]},
+{t:'Context Substrate',n:'20',title:'Enterprise Data Graph',tier:'Core',summary:'Unify data assets, business concepts, people, policies, lineage, governance, and relationships as a substrate for enterprise context.',links:[['Enterprise Data Graph','https://atlan.com/know/enterprise-data-graph/']]},
+{t:'Context Substrate',n:'21',title:'Data Catalog vs Context Layer',tier:'Core',summary:'Use the catalog to answer what exists and who owns it; the context layer addresses what an agent needs to know and is allowed to use right now.',links:[['Data Catalog vs Context Layer','https://atlan.com/know/data-catalog-vs-context-layer/']]},
+{t:'Context Substrate',n:'22',title:'Semantic Layer vs Data Catalog',tier:'Core',summary:'Separate business metric meaning from catalog inventory and ownership.',links:[['Semantic Layer vs Data Catalog','https://atlan.com/know/ai-agent/semantic-layer/semantic-layer-vs-data-catalog/']]},
+{t:'Context Substrate',n:'23',title:'Ontology vs Semantic Layer',tier:'Core',summary:'Learn the distinction before using ontology or graph comparisons deeper in the curriculum.',links:[['Ontology vs Semantic Layer','https://atlan.com/know/ontology-vs-semantic-layer/']]},
+{t:'Context Substrate',n:'24',title:'Knowledge Graph vs Graph Database',tier:'Deepen',summary:'Separate the information model from the underlying graph storage/database implementation.',links:[['Knowledge Graph vs Graph Database','https://atlan.com/know/ai-agent/knowledge-graph/knowledge-graph-vs-graph-database/']]},
+/* 3. CONTEXT ARCHITECTURE */
+{t:'Context Architecture',n:'25',title:'Core Components of a Context Layer',tier:'Core',summary:'The source decomposes enterprise AI context into semantics, operational state, provenance, context cataloging, curation, engineering, and retrieval.',links:[['Core Components of a Context Layer','https://atlan.com/know/core-components-context-layer/']]},
+{t:'Context Architecture',n:'26',title:'What Is a Context Layer?',tier:'Core',summary:'Core definition: a context layer supplies meaning, identity, provenance, permissions, and broader governed context not reliably available from raw data alone.',links:[['What Is a Context Layer?','https://atlan.com/know/what-is-context-layer/']]},
+{t:'Context Architecture',n:'27',title:'Enterprise Context Layer',tier:'Core',summary:'Understand the enterprise-scale context layer as the infrastructure connecting enterprise information and AI systems.',links:[['Enterprise Context Layer','https://atlan.com/know/enterprise-context-layer/'],['Enterprise Context Layer Learning Path','https://atlan.com/know/enterprise-context-layer/learning-path/']]},
+{t:'Context Architecture',n:'28',title:'Context Layer vs Semantic Layer',tier:'Core',summary:'Semantic layers explain what data means; the broader context layer adds ownership, provenance, policy, state, permissions, and task-relevant context.',links:[['Context Layer vs Semantic Layer','https://atlan.com/know/context-layer-vs-semantic-layer/']]},
+{t:'Context Architecture',n:'29',title:'Semantic Views',tier:'Deepen',summary:'A bridge between BI semantic modeling and explicit AI context. The source frames semantic views as preserving human meaning for AI analysts.',links:[['Semantic Views: Human Meaning to Materialized Context','https://atlan.com/know/semantic-views-human-meaning-to-materialized-context/']]},
+{t:'Context Architecture',n:'30',title:'Context Layer 101',tier:'Deepen',summary:'Use this as a consolidation and revision piece after the main context-layer architecture is understood.',links:[['Context Layer 101','https://atlan.com/know/ai-readiness/context-layer-101/']]},
+{t:'Context Architecture',n:'31',title:'Agent Context Layer vs Knowledge Base',tier:'Core',summary:'A knowledge base primarily answers what documents say; an agent context layer addresses broader meaning, provenance, ownership, and access.',links:[['Agent Context Layer vs Knowledge Base','https://atlan.com/know/ai-agent/agent-context-layer-vs-knowledge-base/']]},
+{t:'Context Architecture',n:'32',title:'Agent Context Layer vs RAG',tier:'Core',summary:'The context layer supplies governed enterprise information; RAG performs retrieval over information. The source treats them as complementary.',links:[['Agent Context Layer vs RAG','https://atlan.com/know/ai-agent/agent-context-layer-vs-rag/']]},
+{t:'Context Architecture',n:'33',title:'Memory Layer vs Context Layer',tier:'Core',summary:'Memory provides continuity and persistence; a context layer provides governed enterprise meaning and state.',links:[['Memory Layer vs Context Layer','https://atlan.com/know/memory-layer-vs-context-layer/']]},
+{t:'Context Architecture',n:'34',title:'What Is a Context Graph?',tier:'Core',summary:'Model business meaning, data, people, relationships, lineage, policies, and time/governance context as connected structure.',links:[['What Is a Context Graph?','https://atlan.com/know/what-is-a-context-graph/']]},
+{t:'Context Architecture',n:'35',title:'Context Graph vs Knowledge Graph',tier:'Core',summary:'Use the comparison to distinguish entity/relationship knowledge graphs from broader operational, business, temporal, and governance context graphs.',links:[['Context Graph vs Knowledge Graph','https://atlan.com/know/context-graph-vs-knowledge-graph/']]},
+{t:'Context Architecture',n:'36',title:'Context Graph vs Context Store',tier:'Core',summary:'Compare graph representation and traversal with context-store approaches that emphasize persistence and access patterns.',links:[['Context Graph vs Context Store','https://atlan.com/know/context-graph/context-graph-vs-context-store/']]},
+{t:'Context Architecture',n:'37',title:'Context Graph vs Vector Database',tier:'Core',summary:'Separate relationship traversal from similarity retrieval when choosing representations for context.',links:[['Context Graph vs Vector Database','https://atlan.com/know/context-graph/context-graph-vs-vector-database/']]},
+{t:'Context Architecture',n:'38',title:'Bounded Context Spaces',tier:'Deepen',summary:'Apply bounded-context thinking to AI: isolate domain terminology and context rather than dumping the entire enterprise into every agent.',links:[['Bounded Context Spaces','https://atlan.com/know/bounded-context-spaces/']]},
+/* 4. PRODUCTION CONTEXT ENGINEERING */
+{t:'Production Context Engineering',n:'39',title:'Dynamic Context vs Static Context',tier:'Core',summary:'Static context is predefined instructions/documents; dynamic context is selected or generated from current state.',links:[['Dynamic Context vs Static Context','https://atlan.com/know/dynamic-context-vs-static-context/']]},
+{t:'Production Context Engineering',n:'40',title:'How to Structure Context for LLM Applications',tier:'Core',summary:'Distinguish building context from merely arranging text inside a context window.',links:[['How to Structure Context for LLM Applications','https://atlan.com/know/how-to-structure-context-for-llm-applications/']]},
+{t:'Production Context Engineering',n:'41',title:'How Much Context Is Enough?',tier:'Core',summary:'More tokens do not automatically mean better context. Focus on specificity, freshness, and verifiability.',links:[['How Much Context Is Enough?','https://atlan.com/know/how-much-context-is-enough/']]},
+{t:'Production Context Engineering',n:'42',title:'Four Context Engineering Strategies',tier:'Core',summary:'Learn the four source strategies for controlling what enters an agent context window: Write, Select, Compress, Isolate.',links:[['Four Context Engineering Strategies','https://atlan.com/know/four-context-engineering-strategies/']]},
+{t:'Production Context Engineering',n:'43',title:'How to Build Context for LLMs in Enterprise',tier:'Core',summary:'Move from context-window management into enterprise context construction.',links:[['How to Build Context for LLMs in Enterprise','https://atlan.com/know/how-to-build-context-for-llms-enterprise/']]},
+{t:'Production Context Engineering',n:'44',title:'How to Implement an Enterprise Context Layer',tier:'Core',summary:'Implementation sequence from the source: enterprise data graph, context bootstrapping, unstructured business knowledge, context engineering/testing, and scale across runtimes.',links:[['How to Implement Enterprise Context Layer','https://atlan.com/know/how-to-implement-enterprise-context-layer-for-ai/']]},
+{t:'Production Context Engineering',n:'45',title:'Context Bootstrapping',tier:'Deepen',summary:'Derive useful context from existing signals such as SQL history, dbt lineage, BI definitions, and glossary terms instead of documenting everything manually.',links:[['Context Bootstrapping','https://atlan.com/know/context-bootsrapping/']]},
+{t:'Production Context Engineering',n:'46',title:'Context Compression',tier:'Core',summary:'Prune, summarize, or compress excessive context while retaining critical signals. Compression reduces token load but does not repair bad context.',links:[['Context Compression','https://atlan.com/know/context-compression/']]},
+{t:'Production Context Engineering',n:'47',title:'Context Caching',tier:'Deepen',summary:'Reuse stable context rather than recomputing it. The source warns that stale definitions can propagate faster if cached carelessly.',links:[['Context Caching','https://atlan.com/know/context-caching/']]},
+{t:'Production Context Engineering',n:'48',title:'Knowledge Base Freshness Scoring',tier:'Core',summary:'Treat freshness as a quality dimension. The source highlights content age, embedding lag, stale retrieval rate, and coverage drift.',links:[['LLM Knowledge Base Freshness Scoring','https://atlan.com/know/llm-knowledge-base-freshness-scoring/']]},
+{t:'Production Context Engineering',n:'49',title:'Context Quality Testing for AI Agents',tier:'Core',summary:'Evaluate whether context is correct, complete, relevant, current, and authorized.',links:[['Context Quality Testing for AI Agents','https://atlan.com/know/ai-agent/context-quality-testing-for-ai-agents/']]},
+{t:'Production Context Engineering',n:'50',title:'Context Vacuum / Starvation',tier:'Core',summary:'Study the failure mode where the agent lacks enough context to act correctly.',links:[['Common Context Problems','https://atlan.com/know/common-context-problems-data-teams-building-agents/'],['Context Vacuum','https://atlan.com/know/context-vacuum-data-teams-playbook/']]},
+{t:'Production Context Engineering',n:'51',title:'Context Distraction / Scope Overload',tier:'Core',summary:'Too much context can reduce useful focus. Learn distraction as a distinct production context failure mode.',links:[['Context Distraction','https://atlan.com/know/context-distraction/']]},
+{t:'Production Context Engineering',n:'52',title:'Context Poisoning',tier:'Core',summary:'Bad information entering context can distort downstream behavior. The source treats poisoning as a core production failure mode.',links:[['Context Poisoning','https://atlan.com/know/context-poisoning/']]},
+{t:'Production Context Engineering',n:'53',title:'Context Drift / Rot',tier:'Core',summary:'Old or changed business context can make agent behavior diverge from current business meaning.',links:[['Context Drift','https://atlan.com/know/context-drift-ai-agents/'],['Context Drift Detection','https://atlan.com/know/context-drift-detection/']]},
+{t:'Production Context Engineering',n:'54',title:'RAG Evaluation',tier:'Core',summary:'Evaluate the retrieval system, not just the final generated answer.',links:[['RAG Evaluation','https://atlan.com/know/how-to-evaluate-rag-systems-explained/']]},
+{t:'Production Context Engineering',n:'55',title:'AI Observability & Agent Monitoring',tier:'Core',summary:'Observability asks what happened and why; monitoring makes production behavior inspectable over time.',links:[['AI Observability','https://atlan.com/know/ai-observability/'],['AI Agent Monitoring','https://atlan.com/know/ai-agent-monitoring/']]},
+{t:'Production Context Engineering',n:'56',title:'Decision Traces',tier:'Core',summary:'Trace how context, tools, and decisions contributed to agent behavior and downstream actions.',links:[['Decision Traces','https://atlan.com/know/what-are-decision-traces-for-ai-agents/']]},
+/* 5. AGENT SYSTEMS + RUNTIME */
+{t:'Agent Systems',n:'57',title:'What Is an AI Agent?',tier:'Core',summary:'Understand agents as systems around models, with goals, reasoning, tools, memory, autonomy, and orchestration.',links:[['What Is an AI Agent?','https://atlan.com/know/what-is-agentic-ai/']]},
+{t:'Agent Systems',n:'58',title:'How to Build an AI Agent',tier:'Core',summary:'Use the source architecture to connect data, knowledge, semantic, user, and operational context before choosing frameworks.',links:[['How to Build an AI Agent Step by Step','https://atlan.com/know/how-to-build-an-ai-agent-step-by-step-guide/']]},
+{t:'Agent Systems',n:'59',title:'AI Agent Stack',tier:'Core',summary:'Understand the overall stack instead of reducing an agent to only an LLM and tools; the source separates control plane and context responsibilities.',links:[['AI Agent Stack','https://atlan.com/know/ai-agent-stack/']]},
+{t:'Agent Systems',n:'60',title:'Autonomous Agents vs Copilots',tier:'Deepen',summary:'Separate interactive assistance from systems with greater autonomy over planning and execution.',links:[['Autonomous Agents vs Copilots','https://atlan.com/know/autonomous-agents-vs-copilots/']]},
+{t:'Agent Systems',n:'61',title:'Single-Agent vs Multi-Agent Systems',tier:'Core',summary:'Do not jump into multi-agent systems before understanding the single-agent case and its coordination requirements.',links:[['Single-Agent vs Multi-Agent Systems','https://atlan.com/know/single-agent-vs-multi-agent-systems/']]},
+{t:'Agent Systems',n:'62',title:'MCP vs Function Calling',tier:'Core',summary:'Separate a protocol for connecting models/agents with external tools and data from an application-level function-calling mechanism.',links:[['MCP vs Function Calling','https://atlan.com/know/mcp-vs-function-calling/']]},
+{t:'Agent Systems',n:'63',title:'When to Use MCP vs API',tier:'Core',summary:'Learn where a protocolized context/tool interface fits versus conventional APIs.',links:[['When to Use MCP vs API','https://atlan.com/know/when-to-use-mcp-vs-api/']]},
+{t:'Agent Systems',n:'64',title:'MCP vs A2A Protocol',tier:'Core',summary:'Keep the communication boundary clear: MCP connects agents to tools/data; A2A connects agent to agent.',links:[['MCP vs A2A Protocol','https://atlan.com/know/mcp/mcp-vs-a2a-protocol/']]},
+{t:'Agent Systems',n:'65',title:'Agent Harness vs Agent Framework',tier:'Core',summary:'Frameworks provide construction/orchestration mechanisms; harnesses provide the runtime environment around an agent with context, tools, policies, tests, and controls.',links:[['Agent Harness vs Agent Framework','https://atlan.com/know/ai-agent/agent-harness-vs-agent-framework/']]},
+{t:'Agent Systems',n:'66',title:'Harness Engineering',tier:'Deepen',summary:'Connect harnesses, context pipelines, evaluation, orchestration, and runtime controls into an engineering discipline.',links:[['What Is Harness Engineering?','https://atlan.com/know/what-is-harness-engineering/'],['What Is an Agent Harness?','https://atlan.com/know/what-is-an-agent-harness/']]},
+{t:'Agent Systems',n:'67',title:'Agent Engineering',tier:'Core',summary:'Capstone view from the source: Agent = Model + Harness + Context Pipelines + Evaluation + Orchestration.',links:[['Agent Engineering','https://atlan.com/know/agent-engineering/']]},
+{t:'Agent Systems',n:'68',title:'Agent Runtime & Model Gateway Boundary',tier:'Optional',summary:'Place the model router/gateway below the agent runtime. Useful infrastructure knowledge, but not a prerequisite for context engineering.',links:[['Model Router vs Model Gateway','https://atlan.com/know/llm/model-router-vs-model-gateway/'],['LiteLLM vs Portkey vs Bedrock Gateway','https://atlan.com/know/litellm-vs-portkey-vs-bedrock-gateway/']]},
+/* 6. ENTERPRISE AI PLATFORM */
+{t:'Enterprise AI Platform',n:'69',title:'Metadata & Data Infrastructure for AI',tier:'Core',summary:'Treat metadata, data quality, lineage, catalogs, and semantic definitions as part of the substrate that makes enterprise context usable.',links:[['Enterprise Context Layer','https://atlan.com/know/enterprise-context-layer/']]},
+{t:'Enterprise AI Platform',n:'70',title:'Vector Infrastructure',tier:'Deepen',summary:'Understand vector stores as similarity-retrieval infrastructure, and keep them distinct from knowledge graphs and context graphs.',links:[['What Is a Vector Database?','https://atlan.com/know/what-is-a-vector-database/'],['Vector Store vs Graph Database for Agent Memory','https://atlan.com/know/vector-store-vs-graph-database-agent-memory/']]},
+{t:'Enterprise AI Platform',n:'71',title:'LLMOps vs MLOps',tier:'Core',summary:'Place LLM application lifecycle operations relative to broader ML operations.',links:[['LLMOps vs MLOps','https://atlan.com/know/llmops-vs-mlops/']]},
+{t:'Enterprise AI Platform',n:'72',title:'AI Gateway vs Context Layer',tier:'Core',summary:'Separate model routing, rate limits, cost, and API keys from the enterprise information, definitions, lineage, policy, and context supplied to agents.',links:[['AI Gateway','https://atlan.com/know/what-is-ai-gateway-llm-gateway/']]},
+{t:'Enterprise AI Platform',n:'73',title:'AI Control Plane',tier:'Deepen',summary:'Understand the control-plane idea for governing what AI systems can know, access, and do.',links:[['AI Control Plane','https://atlan.com/know/ai-control-plane/']]},
+{t:'Enterprise AI Platform',n:'74',title:'How to Build a Centralized AI Platform',tier:'Deepen',summary:'Integrate data infrastructure, metadata, LLMOps, gateways, control plane, and context capabilities into a coherent enterprise platform.',links:[['How to Build Centralized AI Platform','https://atlan.com/know/how-to-build-centralized-ai-platform/']]},
+{t:'Enterprise AI Platform',n:'75',title:'Snowflake as an Enterprise AI Platform Case Study',tier:'Optional',summary:'Use the Snowflake branch as architecture to evaluate: storage, semantic views, AI runtime, Horizon Context, enterprise context layer, and agents.',links:[['Context Layer for Snowflake','https://atlan.com/know/context-layer-for-snowflake/'],['Snowflake Horizon Context','https://atlan.com/know/snowflake/snowflake-horizon-context/']]},
+{t:'Enterprise AI Platform',n:'76',title:'MCP-Connected Enterprise Data',tier:'Deepen',summary:'Explore MCP as an interface into enterprise data infrastructure after the context architecture is already clear.',links:[['MCP-Connected Data Catalog','https://atlan.com/know/mcp-connected-data-catalog/'],['MCP Server for Snowflake','https://atlan.com/know/mcp/mcp-server-for-snowflake/']]},
+/* 7. GOVERNANCE + SECURITY */
+{t:'Governance & Security',n:'77',title:'AI Security',tier:'Core',summary:'Use three control surfaces: model, agent/app, and context. Think about jailbreaks, tool actions, data extraction, permissions, poisoning, identity, and leakage.',links:[['AI Security','https://atlan.com/know/ai-security/']]},
+{t:'Governance & Security',n:'78',title:'Prompt Injection Attacks on AI Agents',tier:'Core',summary:'Understand malicious instructions entering the model context and the need for layered defenses around tools, data, and context.',links:[['Prompt Injection Attacks on AI Agents','https://atlan.com/know/prompt-injection-attacks-ai-agents/']]},
+{t:'Governance & Security',n:'79',title:'Agent Identity & Access Control',tier:'Core',summary:'Authorization must be checked at retrieval/access time, not only when the agent is invoked.',links:[['AI Agent Access Control','https://atlan.com/know/ai-agent-access-control/']]},
+{t:'Governance & Security',n:'80',title:'AI Registry',tier:'Core',summary:'Know what agents exist, what is deployed, and where the enterprise AI estate is visible and governable.',links:[['What Is an AI Registry?','https://atlan.com/know/what-is-ai-registry/']]},
+{t:'Governance & Security',n:'81',title:'Agent Sprawl',tier:'Core',summary:'Use the registry/governance lens to understand the operational problem of many independently created agents.',links:[['Agent Sprawl','https://atlan.com/know/ai-agent/agent-sprawl/']]},
+{t:'Governance & Security',n:'82',title:'Data Privacy for AI Agents',tier:'Core',summary:'Connect privacy requirements to data access, context exposure, provenance, and downstream agent actions.',links:[['Data Privacy for AI Agents','https://atlan.com/know/data-privacy-for-ai-agents/']]},
+{t:'Governance & Security',n:'83',title:'AI Governance Framework',tier:'Core',summary:'Create a framework for governance across agents, data, context, actions, and operational controls.',links:[['AI Governance Framework','https://atlan.com/know/ai-readiness/ai-governance-framework/']]},
+{t:'Governance & Security',n:'84',title:'AI Agent Governance',tier:'Core',summary:'Govern the identity, actions, context access, controls, auditability, and lifecycle of agents.',links:[['AI Agent Governance','https://atlan.com/know/ai-agent-governance/']]},
+{t:'Governance & Security',n:'85',title:'Context Engineering for AI Governance',tier:'Core',summary:'Treat context itself as a governance surface: what the agent is allowed to know, from what sources, under which policy.',links:[['Context Engineering for AI Governance','https://atlan.com/know/context-engineering-ai-governance/']]},
+{t:'Governance & Security',n:'86',title:'AI Agent Memory Governance',tier:'Core',summary:'Govern provenance, ownership, access control, retention, freshness, validation, deletion/erasure, and auditability of memory.',links:[['AI Agent Memory Governance','https://atlan.com/know/ai-agent-memory-governance/']]},
+{t:'Governance & Security',n:'87',title:'Zero Trust Data Governance',tier:'Core',summary:'Never assume access. Verify the principal, policy, asset classification, current entitlement, then allow/deny and audit.',links:[['Zero Trust Data Governance','https://atlan.com/know/zero-trust-data-governance/']]},
+{t:'Governance & Security',n:'88',title:'EU AI Act Compliance',tier:'Core',summary:'Map regulatory requirements to engineering controls such as logs/decision traces, human oversight, data quality, lineage, and access controls.',links:[['EU AI Act Compliance','https://atlan.com/know/eu-ai-act-compliance/']]},
+{t:'Governance & Security',n:'89',title:'Shift-Left Governance',tier:'Core',summary:'Move governance checks earlier: design → governance checks → build → test → deploy → monitor.',links:[['Shift-Left Governance','https://atlan.com/know/regovern-shift-left-governance-guide/']]},
+{t:'Governance & Security',n:'90',title:'Enterprise Governance at Scale',tier:'Core',summary:'Bring registry, governance, and context together so the enterprise AI estate is auditable and its knowledge and action surfaces are controlled.',links:[['Context Engineering for AI Governance','https://atlan.com/know/context-engineering-ai-governance/']]},
+{t:'Governance & Security',n:'91',title:'Governance Market / Analyst Reading',tier:'Optional',summary:'Vendor and analyst material is useful for market context, but the source explicitly places Gartner/Forrester/recognition pages below the durable technical concepts.',links:[['Inside Gartner Metadata Management Magic Quadrant','https://atlan.com/know/inside-gartner-metadata-management-magic-quadrant/'],['Forrester Wave Data Governance 2025','https://atlan.com/know/forrester-wave-data-governance-2025/'],['Analyst Recognition 2026','https://atlan.com/know/analyst-recognition-gartner-forrester-governance-leader-2026/']]},
+/* 8. SPECIALIZATION / REINFORCEMENT */
+{t:'Specialization',n:'92',title:'Context Engineering for AI Analyst',tier:'Specialization',summary:'Apply the general context engineering architecture to AI analyst systems: SQL, semantic context, business definitions, lineage, and governance.',links:[['Context Engineering for AI Analyst','https://atlan.com/know/context-engineering-for-ai-analyst/']]},
+{t:'Specialization',n:'93',title:'AI Agents for Software Engineering',tier:'Specialization',summary:'A domain-specific branch for applying the broader context/agent architecture to software engineering.',links:[['AI Agents for Software Engineering','https://atlan.com/know/ai-agents-for-software-engineering/']]},
+{t:'Specialization',n:'94',title:'AI Agents for Data Engineering',tier:'Specialization',summary:'Apply the same architecture to data engineering workflows and enterprise data context.',links:[['AI Agents for Data Engineering','https://atlan.com/know/ai-agents-for-data-engineering/']]},
+{t:'Specialization',n:'95',title:'AI Agents for Data Analytics',tier:'Specialization',summary:'Explore analytics agents after the context, semantic, retrieval, and governance foundations are understood.',links:[['AI Agents for Data Analytics','https://atlan.com/know/ai-agents-for-data-analytics/']]},
+{t:'Specialization',n:'96',title:'AI Agents for Customer Support',tier:'Specialization',summary:'Use customer-support agents as an application branch, not as foundational theory.',links:[['AI Agents for Customer Support','https://atlan.com/know/ai-agents-for-customer-support/']]},
+{t:'Specialization',n:'97',title:'Context Layer for Healthcare AI',tier:'Specialization',summary:'Domain specialization showing how context architecture changes with domain-specific data, policy, and governance requirements.',links:[['Context Layer for Healthcare','https://atlan.com/know/context-layer-for-healthcare-ai/']]},
+{t:'Specialization',n:'98',title:'Context Layer for Financial Services',tier:'Specialization',summary:'Domain specialization for financial-services context, governance, and enterprise AI use cases.',links:[['Context Layer for Financial Services','https://atlan.com/know/context-layer-for-financial-services/']]},
+{t:'Specialization',n:'99',title:'Context Is King — Reinforcement Video',tier:'Optional',summary:'Use the source videos as reinforcement after the conceptual lesson, not as prerequisites.',links:[['Context Is King','https://atlan.com/know/enterprise-context-layer/videos/context-is-king-prukalpa-regovern/?autoplay=1']]},
+{t:'Specialization',n:'100',title:'Same Model, Different Context — Reinforcement Video',tier:'Optional',summary:'Reinforce the idea that the same model can behave differently when the supplied context changes.',links:[['Same Model, Different Context','https://atlan.com/know/enterprise-context-layer/videos/same-model-different-context/?autoplay=1']]},
+{t:'Specialization',n:'101',title:'Why Context, Not Smarter Models — Reinforcement Video',tier:'Optional',summary:'Reinforce the context-centric framing used throughout the source curriculum.',links:[['Why Context — Not Smarter Models','https://atlan.com/know/enterprise-context-layer/videos/why-context-not-smarter-models/?autoplay=1']]},
+{t:'Specialization',n:'102',title:'Why AI Pilots Fail in Production — Reinforcement Video',tier:'Optional',summary:'Use this late in the path to connect context quality, governance, and production failures.',links:[['Why AI Pilots Fail in Production','https://atlan.com/know/enterprise-context-layer/videos/why-ai-pilots-fail-in-production/?autoplay=1']]},
+];
+
+const trackOrder = [...new Set(lessons.map(x=>x.t))];
+const lessonById = Object.fromEntries(lessons.map(x=>[x.n,x]));
+
+function localDateKey(d=new Date()){ const x = new Date(d); x.setHours(0,0,0,0); return x.toISOString().slice(0,10); }
+function addDays(dateString, days){ const d = new Date(dateString+'T00:00:00'); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+function fmtDate(s){ if(!s) return '—'; return new Intl.DateTimeFormat(undefined,{day:'2-digit',month:'short',year:'numeric'}).format(new Date(s+'T00:00:00')); }
+function daysUntil(s){ const today = new Date(localDateKey()+'T00:00:00'); const d=new Date(s+'T00:00:00'); return Math.round((d-today)/86400000); }
+function slugStatus(status){ return status || 'not-started'; }
+function escapeHtml(value){ return String(value??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function norm(s){ return String(s||'').toLowerCase(); }
+
+let state = {
+  version: VERSION,
+  updatedAt: new Date().toISOString(),
+  dailyTarget: DAILY_TARGET,
+  lessons: {},
+};
+let fileHandle = null;
+let saveTimer = null;
+let activeView = 'curriculum';
+let openedLessonId = null;
+let modalAction = null;
+
+function lessonState(id){
+  if(!state.lessons[id]) state.lessons[id] = {status:'not-started',completedAt:null,reviews:{d2:null,d7:null,d30:null}};
+  const s = state.lessons[id];
+  if(!s.reviews) s.reviews={d2:null,d7:null,d30:null};
+  return s;
+}
+function getCompletedLessons(){ return lessons.filter(l=>lessonState(l.n).status==='completed'); }
+function completedCount(){ return getCompletedLessons().length; }
+function completedTodayCount(){ const today=localDateKey(); return getCompletedLessons().filter(l=>lessonState(l.n).completedAt===today).length; }
+function progressPct(){ return Math.round((completedCount()/lessons.length)*100); }
+function lessonReviewEntries(lesson){
+  const s=lessonState(lesson.n); if(!s.completedAt) return [];
+  const dates=[['d2',2,'Day 2'],['d7',7,'Day 7'],['d30',30,'Day 30']];
+  return dates.map(([key,day,label])=>({key,day,label,due:addDays(s.completedAt,day),doneAt:s.reviews[key]}));
+}
+function isReviewDue(entry){ return !entry.doneAt && daysUntil(entry.due)<=0; }
+function reviewState(lesson){
+  const entries=lessonReviewEntries(lesson); if(!entries.length) return 'none';
+  if(entries.every(x=>x.doneAt)) return 'done';
+  if(entries.some(isReviewDue)) return 'due';
+  return 'upcoming';
+}
+function reviewDueList(){
+  const arr=[]; for(const lesson of lessons) for(const e of lessonReviewEntries(lesson)) if(isReviewDue(e)) arr.push({lesson,e});
+  return arr.sort((a,b)=>a.e.due.localeCompare(b.e.due));
+}
+function allFutureReviews(){
+  const arr=[]; for(const lesson of lessons) for(const e of lessonReviewEntries(lesson)) if(!e.doneAt) arr.push({lesson,e});
+  return arr.sort((a,b)=>a.e.due.localeCompare(b.e.due));
+}
+
+/* Native file-system persistence */
+function dbOpen(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,1);
+    req.onupgradeneeded=()=>{ req.result.createObjectStore(DB_STORE); };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function dbSetHandle(handle){ const db=await dbOpen(); await new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readwrite'); tx.objectStore(DB_STORE).put(handle,DB_KEY); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); }); }
+async function dbGetHandle(){ const db=await dbOpen(); return await new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readonly'); const req=tx.objectStore(DB_STORE).get(DB_KEY); req.onsuccess=()=>res(req.result||null); req.onerror=()=>rej(req.error); }); }
+function saveFileName(name){ localStorage.setItem(PATH_KEY,name||''); }
+function savedFileName(){ return localStorage.getItem(PATH_KEY)||''; }
+async function verifyPermission(handle, mode='readwrite'){
+  if(!handle?.queryPermission || !handle?.requestPermission) return true;
+  const opts={mode};
+  if(await handle.queryPermission(opts)==='granted') return true;
+  return (await handle.requestPermission(opts))==='granted';
+}
+async function readStateFromHandle(handle){
+  const file=await handle.getFile();
+  const text=await file.text();
+  const parsed=JSON.parse(text);
+  if(!parsed || typeof parsed!=='object') throw new Error('Invalid JSON state.');
+  state={version:VERSION,updatedAt:new Date().toISOString(),dailyTarget:DAILY_TARGET,lessons:parsed.lessons||{}};
+  for(const l of lessons) lessonState(l.n);
+}
+async function writeStateToHandle(handle){
+  const writable=await handle.createWritable();
+  state.updatedAt=new Date().toISOString();
+  await writable.write(JSON.stringify(state,null,2));
+  await writable.close();
+}
+function scheduleSave(){
+  state.updatedAt=new Date().toISOString();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{
+    if(!fileHandle) { renderAll(); return; }
+    try{ await writeStateToHandle(fileHandle); setSaveState('Saved '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})); renderAll(); }
+    catch(e){ setSaveState('Save failed — click Storage to reconnect', true); console.error(e); renderAll(); }
+  },350);
+}
+function setSaveState(text, bad=false){ const el=document.getElementById('saveState'); el.textContent=text; el.style.color=bad?'var(--danger)':''; }
+
+async function chooseOpenFile(){
+  if(!window.showOpenFilePicker){ showStorageNotice('File System Access API is unavailable in this browser/origin. Use Chrome/Edge on localhost, or use the JSON import/export fallback below.','warn'); return; }
+  const [handle]=await window.showOpenFilePicker({multiple:false,types:[{description:'JSON progress',accept:{'application/json':['.json']}}]});
+  const ok=await verifyPermission(handle); if(!ok) throw new Error('Permission was not granted.');
+  await readStateFromHandle(handle); fileHandle=handle; await dbSetHandle(handle); saveFileName(handle.name); setSaveState('Connected · '+handle.name); scheduleSave(); renderAll();
+}
+async function chooseSaveFile(){
+  if(!window.showSaveFilePicker){ showStorageNotice('File System Access API is unavailable in this browser/origin. Use Chrome/Edge on localhost, or use the JSON export fallback below.','warn'); return; }
+  const handle=await window.showSaveFilePicker({suggestedName:'context-engineering-progress.json',types:[{description:'JSON progress',accept:{'application/json':['.json']}}]});
+  fileHandle=handle; await dbSetHandle(handle); saveFileName(handle.name); await writeStateToHandle(handle); setSaveState('Saved · '+handle.name); renderAll();
+}
+async function restoreSavedHandle(){
+  try{
+    if(!('indexedDB' in window)) return;
+    const handle=await dbGetHandle();
+    if(!handle) return;
+    if(await verifyPermission(handle,'readwrite')){
+      await readStateFromHandle(handle); fileHandle=handle; setSaveState('Restored · '+(handle.name||savedFileName())); renderAll();
+    } else setSaveState('Permission needed · '+(handle.name||savedFileName()));
+  }catch(e){ console.warn('Could not restore saved handle',e); setSaveState('Stored file unavailable'); }
+}
+function exportFallback(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='context-engineering-progress.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function importFallback(input){
+  const file=input.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ state={version:VERSION,updatedAt:new Date().toISOString(),dailyTarget:DAILY_TARGET,lessons:JSON.parse(reader.result).lessons||{}}; for(const l of lessons) lessonState(l.n); renderAll(); scheduleSave(); setSaveState('Imported · '+file.name); }catch(e){ alert('Could not read that JSON file.'); } }; reader.readAsText(file);
+}
+
+function updateLessonStatus(id,status){
+  const s=lessonState(id); s.status=status;
+  if(status==='completed'){
+    if(!s.completedAt) s.completedAt=localDateKey();
+  } else if(status!=='completed'){
+    s.completedAt=null; s.reviews={d2:null,d7:null,d30:null};
+  }
+  scheduleSave();
+}
+function toggleLesson(id){ const s=lessonState(id); updateLessonStatus(id,s.status==='completed'?'not-started':'completed'); }
+function markReviewDone(id,key){ const s=lessonState(id); const entries=lessonReviewEntries(lessonById[id]); const e=entries.find(x=>x.key===key); if(!e) return; if(s.reviews[key]) s.reviews[key]=null; else s.reviews[key]=localDateKey(); scheduleSave(); }
+function resetAll(){ state={version:VERSION,updatedAt:new Date().toISOString(),dailyTarget:DAILY_TARGET,lessons:{}}; for(const l of lessons) lessonState(l.n); scheduleSave(); }
+
+function getFilteredLessons(){
+  const q=norm(document.getElementById('searchInput')?.value); const track=document.getElementById('trackFilter')?.value||''; const tier=document.getElementById('tierFilter')?.value||''; const status=document.getElementById('statusFilter')?.value||''; const review=document.getElementById('reviewFilter')?.value||'';
+  return lessons.filter(l=>{
+    const hay=norm([l.title,l.summary,l.t,...l.links.map(x=>x[0]),...l.links.map(x=>x[1])].join(' '));
+    return (!q||hay.includes(q)) && (!track||l.t===track) && (!tier||l.tier===tier) && (!status||lessonState(l.n).status===status) && (!review||reviewState(l)===review);
+  });
+}
+function statusLabel(s){ return s==='completed'?'Completed':s==='in-progress'?'In progress':'Not started'; }
+function tierClass(t){ return t==='Core'?'core':t==='Deepen'?'secondary':t==='Specialization'?'special':'optional'; }
+function renderNav(){
+  const nav=document.getElementById('nav'); nav.innerHTML=[['curriculum','Curriculum'],['dashboard','Dashboard'],['reviews','Reviews'],['storage','Storage']].map(([id,label])=>`<button class="${activeView===id?'active':''}" data-view="${id}">${label}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+}
+function switchView(view){ activeView=view; document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById('view-'+view).classList.add('active'); document.getElementById('pageTitle').textContent=view[0].toUpperCase()+view.slice(1); renderNav(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function renderCurriculum(){
+  const root=document.getElementById('curriculumRoot'); const filtered=getFilteredLessons(); const grouped={}; filtered.forEach(l=>(grouped[l.t]??=[]).push(l));
+  if(!filtered.length){root.innerHTML='<div class="empty">No lessons match the current filters.</div>';return;}
+  root.innerHTML=trackOrder.filter(t=>grouped[t]).map((t,i)=>{
+    const arr=grouped[t]; const all=lessons.filter(l=>l.t===t); const done=all.filter(l=>lessonState(l.n).status==='completed').length; const pct=Math.round(done/all.length*100);
+    return `<div class="level-card card"><div class="level-header"><div><div class="level-label">Track ${String(trackOrder.indexOf(t)+1).padStart(2,'0')}</div><h3>${escapeHtml(t)}</h3></div><div style="min-width:190px"><div class="level-top"><div class="level-count">${done} / ${all.length} completed</div><div class="muted">${pct}%</div></div><div class="progress" style="margin-top:8px"><i style="width:${pct}%"></i></div></div></div><div class="level-body">${arr.map(renderLessonRow).join('')}</div></div>`;
+  }).join('');
+  root.querySelectorAll('[data-status]').forEach(el=>el.onchange=e=>updateLessonStatus(el.dataset.status,e.target.value));
+  root.querySelectorAll('[data-toggle]').forEach(el=>el.onclick=()=>toggleLesson(el.dataset.toggle));
+  root.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>openLesson(el.dataset.open));
+}
+function renderLessonRow(l){
+  const s=lessonState(l.n); const done=s.status==='completed'; const review=reviewState(l); const reviewChip=review==='due'?'<span class="chip secondary">Review due</span>':review==='upcoming'?'<span class="chip">Review scheduled</span>':review==='done'?'<span class="chip core">Reviews done</span>':'';
+  return `<div class="lesson"><button class="check ${done?'done':s.status==='in-progress'?'partial':''}" title="Toggle completion" data-toggle="${l.n}">${done?'✓':s.status==='in-progress'?'•':''}</button><div class="lesson-main"><div class="lesson-line"><span class="lesson-title">${escapeHtml(l.n)} · ${escapeHtml(l.title)}</span><span class="chip ${tierClass(l.tier)}">${escapeHtml(l.tier)}</span>${reviewChip}</div><div class="lesson-summary">${escapeHtml(l.summary)}</div><div class="lesson-meta">${done?`Completed ${fmtDate(s.completedAt)}`:'Not completed yet'} · ${l.links.length} link${l.links.length===1?'':'s'} · ChatGPT map</div></div><div class="lesson-actions"><select class="field status-select" data-status="${l.n}" aria-label="Status for ${escapeHtml(l.title)}"><option value="not-started" ${s.status==='not-started'?'selected':''}>Not started</option><option value="in-progress" ${s.status==='in-progress'?'selected':''}>In progress</option><option value="completed" ${s.status==='completed'?'selected':''}>Completed</option></select><button class="icon-btn" data-open="${l.n}" title="Open lesson details">↗</button></div></div>`;
+}
+function renderDashboard(){
+  const done=completedCount(), today=completedTodayCount(), due=reviewDueList().length, pct=progressPct();
+  document.getElementById('statGrid').innerHTML=[['Overall progress',pct+'%',done+' / '+lessons.length+' lessons'],['Today',today+' / '+DAILY_TARGET,today>=DAILY_TARGET?'Target met':'3 lesson minimum'],['Reviews due',String(due),due?'Needs attention':'Nothing due today'],['Current track',currentTrack(),currentPositionLabel()]].map(x=>`<div class="card stat"><div class="label">${x[0]}</div><div class="value">${x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');
+  document.getElementById('todayCount').textContent=`${today}/${DAILY_TARGET} completed today`;
+  const next=lessons.filter(l=>lessonState(l.n).status!=='completed').slice(0,DAILY_TARGET);
+  document.getElementById('todaySession').innerHTML=next.length?`<div class="today-list">${next.map(l=>{const s=lessonState(l.n); return `<div class="lesson-mini"><div class="lesson-mini-main"><span class="num">${l.n}</span><div><div class="name">${escapeHtml(l.title)}</div><div class="meta">${escapeHtml(l.t)} · ${escapeHtml(l.tier)}</div></div></div><div style="display:flex;gap:6px"><button class="btn small" data-dash-open="${l.n}">Open</button><button class="btn small primary" data-dash-complete="${l.n}">Complete</button></div></div>`}).join('')}</div>${today>=DAILY_TARGET?'<div class="notice good" style="margin-top:10px">Daily minimum reached. You can continue beyond the minimum.</div>':''}`:'<div class="empty">All lessons are completed. Use the review queue for spaced repetition.</div>';
+  document.querySelectorAll('[data-dash-open]').forEach(x=>x.onclick=()=>openLesson(x.dataset.dashOpen));
+  document.querySelectorAll('[data-dash-complete]').forEach(x=>x.onclick=()=>updateLessonStatus(x.dataset.dashComplete,'completed'));
+  const dueList=reviewDueList().slice(0,6); document.getElementById('reviewPreview').innerHTML=dueList.length?`<div class="queue">${dueList.map(x=>`<div class="lesson-mini"><div class="lesson-mini-main"><span class="status-dot ${x.e.doneAt?'completed':''}"></span><div><div class="name">${escapeHtml(x.lesson.title)}</div><div class="meta">${x.e.label} · due ${fmtDate(x.e.due)}</div></div></div><button class="btn small" data-review-preview="${x.lesson.n}">Open</button></div>`).join('')}</div>`:'<div class="empty">No reviews are due today.</div>';
+  document.querySelectorAll('[data-review-preview]').forEach(x=>x.onclick=()=>openLesson(x.dataset.reviewPreview));
+  document.getElementById('trackProgress').innerHTML=trackOrder.map(t=>{const all=lessons.filter(l=>l.t===t),d=all.filter(l=>lessonState(l.n).status==='completed').length,p=Math.round(d/all.length*100); return `<div class="level-row"><div class="level-top"><div class="level-name">${escapeHtml(t)}</div><div class="level-count">${d}/${all.length} · ${p}%</div></div><div class="progress" style="margin-top:8px"><i style="width:${p}%"></i></div></div>`}).join('');
+}
+function currentTrack(){ const n=lessons.find(l=>lessonState(l.n).status!=='completed'); return n?n.t:'Mastery complete'; }
+function currentPositionLabel(){ const n=lessons.find(l=>lessonState(l.n).status!=='completed'); return n?n.n+' · '+n.title:'All lessons completed'; }
+function renderReviews(){
+  const upcoming=allFutureReviews(); const due=reviewDueList(); document.getElementById('reviewCount').textContent=`${due.length} due · ${upcoming.length} open`; const root=document.getElementById('reviewsRoot');
+  if(!upcoming.length){root.innerHTML='<div class="empty">No open reviews. Complete a lesson to generate Day 2, Day 7 and Day 30 reviews.</div>';return;}
+  root.innerHTML=upcoming.map(x=>{const dueNow=isReviewDue(x.e); return `<div class="lesson-mini" style="margin-bottom:8px"><div class="lesson-mini-main"><div class="num">${x.lesson.n}</div><div><div class="name">${escapeHtml(x.lesson.title)}</div><div class="meta">${escapeHtml(x.lesson.t)} · completed ${fmtDate(lessonState(x.lesson.n).completedAt)} · ${x.e.label} · due ${fmtDate(x.e.due)}</div></div></div><div style="display:flex;gap:6px"><span class="chip ${dueNow?'secondary':''}">${dueNow?(daysUntil(x.e.due)<0?'Overdue':'Due today'):'Upcoming'}</span><button class="btn small ${dueNow?'primary':''}" data-review-toggle="${x.lesson.n}|${x.e.key}">${x.e.doneAt?'Undo':'Mark reviewed'}</button></div></div>`}).join('');
+  root.querySelectorAll('[data-review-toggle]').forEach(x=>x.onclick=()=>{const [id,key]=x.dataset.reviewToggle.split('|'); markReviewDone(id,key);});
+}
+function renderStorage(){
+  const supported=!!window.showOpenFilePicker && !!window.showSaveFilePicker; const fname=fileHandle?.name||savedFileName()||'No file selected';
+  document.getElementById('storageRoot').innerHTML=`<div class="grid two"><div class="card panel"><div class="panel-header"><div class="panel-title">Current JSON file</div><span class="chip ${fileHandle?'core':'secondary'}">${fileHandle?'Connected':'Not connected'}</span></div><div style="font-size:14px;font-weight:800;margin-bottom:6px">${escapeHtml(fname)}</div><div class="muted">The browser does not expose the full local filesystem path to web apps. This app stores the file handle in IndexedDB and the last file name in localStorage.</div><div class="modal-actions" style="justify-content:flex-start"><button class="btn primary" id="storageCreate">Create / Save JSON</button><button class="btn" id="storageOpen">Open JSON</button><button class="btn" id="storageExport">Export copy</button><label class="btn" style="display:inline-flex;align-items:center">Import copy<input id="storageImport" type="file" accept="application/json,.json" hidden></label></div></div><div class="card panel"><div class="panel-header"><div class="panel-title">What is stored?</div></div><div class="muted" style="line-height:1.7"><strong style="color:var(--text)">Lesson status</strong><br>not-started / in-progress / completed<br><br><strong style="color:var(--text)">Completion date</strong><br>saved when a lesson becomes completed<br><br><strong style="color:var(--text)">Review schedule</strong><br>Day 2, Day 7, Day 30<br><br><strong style="color:var(--text)">Daily target</strong><br>3 lessons minimum</div></div></div>${supported?'':'<div class="notice warn" style="margin-top:14px">File System Access API is not available in this current origin/browser. For persistent file handles, open this single HTML file through a local server such as <span class="kbd">http://localhost</span> in Chrome or Edge.</div>'}`;
+  document.getElementById('storageCreate').onclick=()=>chooseSaveFile().catch(e=>{console.error(e);setSaveState('Create cancelled');});
+  document.getElementById('storageOpen').onclick=()=>chooseOpenFile().catch(e=>{console.error(e);alert(e.message||'Could not open file.');});
+  document.getElementById('storageExport').onclick=exportFallback;
+  document.getElementById('storageImport').onchange=e=>importFallback(e.target);
+}
+function showStorageNotice(msg,type='info'){document.getElementById('fileNotice').innerHTML=`<div class="notice ${type}">${escapeHtml(msg)}</div>`;}
+function renderFileNotice(){
+  const name=fileHandle?.name||savedFileName();
+  if(name){ document.getElementById('fileNotice').innerHTML=`<div class="notice good">Progress file: <strong>${escapeHtml(name)}</strong>. Changes auto-save after a short delay.</div>`; }
+  else if(!(window.showOpenFilePicker&&window.showSaveFilePicker)){ document.getElementById('fileNotice').innerHTML='<div class="notice warn">The browser File System Access API is unavailable here. The checklist still works, but automatic JSON-file persistence needs a secure local origin such as localhost.</div>'; }
+  else document.getElementById('fileNotice').innerHTML='<div class="notice info">Connect a JSON file once. The browser will keep the file handle in IndexedDB and the file name in localStorage so future launches can restore it when permission is still available.</div>';
+}
+
+function openLesson(id){ openedLessonId=id; const l=lessonById[id], s=lessonState(id); document.getElementById('drawerTitle').textContent=`${l.n} · ${l.title}`; const reviews=lessonReviewEntries(l); document.getElementById('drawerBody').innerHTML=`<div class="chips"><span class="chip ${tierClass(l.tier)}">${escapeHtml(l.tier)}</span><span class="chip">${escapeHtml(l.t)}</span><span class="chip">${statusLabel(s.status)}</span></div><div style="margin-top:14px"><p style="margin:0">${escapeHtml(l.summary)}</p></div><div class="section"><div class="panel-title" style="margin-bottom:8px">Associated article links</div>${l.links.map(x=>`<div class="link-row"><span>${escapeHtml(x[0])}</span><a href="${x[1]}" target="_blank" rel="noopener noreferrer">Open ↗</a></div>`).join('')}</div><div class="section"><div class="panel-title" style="margin-bottom:8px">ChatGPT map</div><div class="link-row"><span>Curriculum source map</span><a href="${CHATGPT_MAP}" target="_blank" rel="noopener noreferrer">Open map ↗</a></div></div><div class="section"><div class="panel-title" style="margin-bottom:8px">Progress</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select class="field" id="drawerStatus"><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="completed">Completed</option></select><button class="btn primary" id="drawerSaveStatus">Save status</button></div><div class="muted" style="margin-top:8px">${s.completedAt?`Completed ${fmtDate(s.completedAt)}`:'Completion date will be recorded when marked completed.'}</div></div>${reviews.length?`<div class="section"><div class="panel-title" style="margin-bottom:8px">Review schedule</div><table class="review-table"><thead><tr><th>Review</th><th>Due</th><th>State</th><th></th></tr></thead><tbody>${reviews.map(r=>`<tr><td>${r.label}</td><td>${fmtDate(r.due)}</td><td>${r.doneAt?'Done':isReviewDue(r)?'Due':'Upcoming'}</td><td><button class="btn small ${r.doneAt?'':'primary'}" data-drawer-review="${r.key}">${r.doneAt?'Undo':'Mark reviewed'}</button></td></tr>`).join('')}</tbody></table></div>`:''}`;
+  document.getElementById('drawerStatus').value=s.status; document.getElementById('drawerSaveStatus').onclick=()=>{updateLessonStatus(id,document.getElementById('drawerStatus').value);openLesson(id);}; document.querySelectorAll('[data-drawer-review]').forEach(x=>x.onclick=()=>{markReviewDone(id,x.dataset.drawerReview);openLesson(id);}); document.getElementById('drawer').classList.add('open');
+}
+function closeLesson(){ document.getElementById('drawer').classList.remove('open'); openedLessonId=null; }
+
+function renderAll(){ renderNav(); renderCurriculum(); renderDashboard(); renderReviews(); renderStorage(); renderFileNotice(); }
+
+/* UI */
+document.getElementById('openFileBtn').onclick=()=>chooseOpenFile().catch(e=>{if(e?.name!=='AbortError') alert(e.message||'Could not open file.');});
+document.getElementById('createFileBtn').onclick=()=>chooseSaveFile().catch(e=>{if(e?.name!=='AbortError') alert(e.message||'Could not create file.');});
+document.getElementById('searchInput').addEventListener('input',renderCurriculum);
+['trackFilter','tierFilter','statusFilter','reviewFilter'].forEach(id=>document.getElementById(id).addEventListener('change',renderCurriculum));
+document.getElementById('drawerClose').onclick=closeLesson; document.getElementById('drawerBackdrop').onclick=closeLesson; document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLesson();closeModal();}});
+document.getElementById('openReviewBtn').onclick=()=>switchView('reviews');
+for(const t of trackOrder){ const o=document.createElement('option'); o.value=t;o.textContent=t;document.getElementById('trackFilter').appendChild(o); }
+
+/* Restore file handle after first render. */
+for(const l of lessons) lessonState(l.n);
+renderAll();
+restoreSavedHandle();
+</script>
+</body>
+</html>
