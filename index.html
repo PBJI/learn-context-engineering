@@ -51,14 +51,14 @@ a{color:inherit;text-decoration:none}
   <aside class="sidebar">
     <div class="brand"><div class="brand-mark">CE</div><div><h1>Context Engineering</h1><p>0 → Mastery Checklist</p></div></div>
     <nav class="nav" id="nav"></nav>
-    <div class="sidebar-card"><strong>Local-first storage</strong><p>Your progress is kept in a JSON file you choose. The app stores the file handle in IndexedDB and the file name in localStorage so it can restore the file without asking again when browser permissions persist.</p></div>
+    <div class="sidebar-card"><strong>Local-first storage</strong><p>Your progress is saved automatically in this browser's localStorage. Use Import / Export in the Storage view to move your progress as a JSON file.</p></div>
   </aside>
   <main class="main">
     <header class="topbar">
       <div class="topbar-left"><div class="page-title" id="pageTitle">Curriculum</div><div class="save-state" id="saveState">Not connected</div></div>
       <div class="toolbar">
-        <button class="btn small optional" id="openFileBtn">Open JSON</button>
-        <button class="btn small primary" id="createFileBtn">Create / Save JSON</button>
+        <button class="btn small optional" id="importJsonBtn">Import JSON</button>
+        <button class="btn small primary" id="exportJsonBtn">Export JSON</button>
       </div>
     </header>
 
@@ -92,7 +92,7 @@ a{color:inherit;text-decoration:none}
       </section>
 
       <section class="view" id="view-storage">
-        <div class="hero"><div><div class="eyebrow">Storage</div><h2>Your progress file</h2><p>Native browser File System Access API. The exact filesystem path is intentionally not exposed by browsers; this app stores the selected handle in IndexedDB and the last file name in localStorage, then attempts to restore access automatically.</p></div></div>
+        <div class="hero"><div><div class="eyebrow">Storage</div><h2>Your progress</h2><p>Your checklist state is saved automatically in localStorage in this browser. Import and export JSON snapshots whenever you want a portable backup or to move your progress.</p></div></div>
         <div id="storageRoot"></div>
       </section>
     </div>
@@ -102,16 +102,14 @@ a{color:inherit;text-decoration:none}
 <div class="drawer" id="drawer"><div class="drawer-backdrop" id="drawerBackdrop"></div><aside class="drawer-panel"><div class="drawer-head"><div><div class="eyebrow">Lesson</div><div id="drawerTitle" style="font-weight:850"></div></div><button class="icon-btn" id="drawerClose">×</button></div><div class="drawer-body" id="drawerBody"></div></aside></div>
 
 <div class="modal" id="confirmModal"><div class="modal-bg" id="modalBg"></div><div class="modal-card"><h3 id="modalTitle">Confirm</h3><p id="modalText"></p><div class="modal-actions"><button class="btn" id="modalCancel">Cancel</button><button class="btn primary" id="modalConfirm">Continue</button></div></div></div>
+<input id="jsonImportInput" type="file" accept="application/json,.json" hidden>
 
 <script>
 'use strict';
 
 const CHATGPT_MAP = 'https://chatgpt.com/share/6abded2f-f9fc-83e8-a0c4-59211036f314';
 const DAILY_TARGET = 3;
-const DB_NAME = 'context-engineering-checklist';
-const DB_STORE = 'handles';
-const DB_KEY = 'progress-handle';
-const PATH_KEY = 'progress-file-name';
+const STORAGE_KEY = 'context-engineering-progress-v1';
 const VERSION = 1;
 
 const lessons = [
@@ -244,7 +242,6 @@ let state = {
   dailyTarget: DAILY_TARGET,
   lessons: {},
 };
-let fileHandle = null;
 let saveTimer = null;
 let activeView = 'curriculum';
 let openedLessonId = null;
@@ -281,78 +278,88 @@ function allFutureReviews(){
   return arr.sort((a,b)=>a.e.due.localeCompare(b.e.due));
 }
 
-/* Native file-system persistence */
-function dbOpen(){
-  return new Promise((resolve,reject)=>{
-    const req=indexedDB.open(DB_NAME,1);
-    req.onupgradeneeded=()=>{ req.result.createObjectStore(DB_STORE); };
-    req.onsuccess=()=>resolve(req.result);
-    req.onerror=()=>reject(req.error);
-  });
-}
-async function dbSetHandle(handle){ const db=await dbOpen(); await new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readwrite'); tx.objectStore(DB_STORE).put(handle,DB_KEY); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); }); }
-async function dbGetHandle(){ const db=await dbOpen(); return await new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readonly'); const req=tx.objectStore(DB_STORE).get(DB_KEY); req.onsuccess=()=>res(req.result||null); req.onerror=()=>rej(req.error); }); }
-function saveFileName(name){ localStorage.setItem(PATH_KEY,name||''); }
-function savedFileName(){ return localStorage.getItem(PATH_KEY)||''; }
-async function verifyPermission(handle, mode='readwrite'){
-  if(!handle?.queryPermission || !handle?.requestPermission) return true;
-  const opts={mode};
-  if(await handle.queryPermission(opts)==='granted') return true;
-  return (await handle.requestPermission(opts))==='granted';
-}
-async function readStateFromHandle(handle){
-  const file=await handle.getFile();
-  const text=await file.text();
-  const parsed=JSON.parse(text);
-  if(!parsed || typeof parsed!=='object') throw new Error('Invalid JSON state.');
-  state={version:VERSION,updatedAt:new Date().toISOString(),dailyTarget:DAILY_TARGET,lessons:parsed.lessons||{}};
-  for(const l of lessons) lessonState(l.n);
-}
-async function writeStateToHandle(handle){
-  const writable=await handle.createWritable();
+/* LocalStorage persistence + JSON import/export */
+function saveLocalState(){
   state.updatedAt=new Date().toISOString();
-  await writable.write(JSON.stringify(state,null,2));
-  await writable.close();
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    setSaveState('Saved locally');
+  }catch(e){
+    setSaveState('Local save failed', true);
+    console.error(e);
+  }
+}
+function restoreLocalState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw){ setSaveState('No local progress yet'); return; }
+    const parsed=JSON.parse(raw);
+    if(!parsed || typeof parsed!=='object') throw new Error('Invalid local state.');
+    state={
+      version:VERSION,
+      updatedAt:parsed.updatedAt||new Date().toISOString(),
+      dailyTarget:DAILY_TARGET,
+      lessons:parsed.lessons||{}
+    };
+    for(const l of lessons) lessonState(l.n);
+    setSaveState('Loaded from localStorage');
+  }catch(e){
+    console.warn('Could not restore local progress',e);
+    state={version:VERSION,updatedAt:new Date().toISOString(),dailyTarget:DAILY_TARGET,lessons:{}};
+    setSaveState('Local progress unavailable', true);
+  }
 }
 function scheduleSave(){
   state.updatedAt=new Date().toISOString();
   clearTimeout(saveTimer);
-  saveTimer=setTimeout(async()=>{
-    if(!fileHandle) { renderAll(); return; }
-    try{ await writeStateToHandle(fileHandle); setSaveState('Saved '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})); renderAll(); }
-    catch(e){ setSaveState('Save failed — click Storage to reconnect', true); console.error(e); renderAll(); }
-  },350);
+  saveTimer=setTimeout(()=>{ saveLocalState(); renderAll(); },150);
 }
-function setSaveState(text, bad=false){ const el=document.getElementById('saveState'); el.textContent=text; el.style.color=bad?'var(--danger)':''; }
-
-async function chooseOpenFile(){
-  if(!window.showOpenFilePicker){ showStorageNotice('File System Access API is unavailable in this browser/origin. Use Chrome/Edge on localhost, or use the JSON import/export fallback below.','warn'); return; }
-  const [handle]=await window.showOpenFilePicker({multiple:false,types:[{description:'JSON progress',accept:{'application/json':['.json']}}]});
-  const ok=await verifyPermission(handle); if(!ok) throw new Error('Permission was not granted.');
-  await readStateFromHandle(handle); fileHandle=handle; await dbSetHandle(handle); saveFileName(handle.name); setSaveState('Connected · '+handle.name); scheduleSave(); renderAll();
+function setSaveState(text,bad=false){
+  const el=document.getElementById('saveState');
+  el.textContent=text;
+  el.style.color=bad?'var(--danger)':'';
 }
-async function chooseSaveFile(){
-  if(!window.showSaveFilePicker){ showStorageNotice('File System Access API is unavailable in this browser/origin. Use Chrome/Edge on localhost, or use the JSON export fallback below.','warn'); return; }
-  const handle=await window.showSaveFilePicker({suggestedName:'context-engineering-progress.json',types:[{description:'JSON progress',accept:{'application/json':['.json']}}]});
-  fileHandle=handle; await dbSetHandle(handle); saveFileName(handle.name); await writeStateToHandle(handle); setSaveState('Saved · '+handle.name); renderAll();
-}
-async function restoreSavedHandle(){
+function exportJson(){
   try{
-    if(!('indexedDB' in window)) return;
-    const handle=await dbGetHandle();
-    if(!handle) return;
-    if(await verifyPermission(handle,'readwrite')){
-      await readStateFromHandle(handle); fileHandle=handle; setSaveState('Restored · '+(handle.name||savedFileName())); renderAll();
-    } else setSaveState('Permission needed · '+(handle.name||savedFileName()));
-  }catch(e){ console.warn('Could not restore saved handle',e); setSaveState('Stored file unavailable'); }
+    state.updatedAt=new Date().toISOString();
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='context-engineering-progress.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    setSaveState('Exported JSON');
+  }catch(e){
+    console.error(e);
+    setSaveState('Export failed',true);
+  }
 }
-function exportFallback(){
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='context-engineering-progress.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+function importJsonFromInput(input){
+  const file=input.files?.[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const parsed=JSON.parse(reader.result);
+      if(!parsed || typeof parsed!=='object' || !parsed.lessons || typeof parsed.lessons!=='object') throw new Error('Invalid progress JSON.');
+      state={version:VERSION,updatedAt:new Date().toISOString(),dailyTarget:DAILY_TARGET,lessons:parsed.lessons};
+      for(const l of lessons) lessonState(l.n);
+      saveLocalState();
+      renderAll();
+      setSaveState('Imported · '+file.name);
+      input.value='';
+    }catch(e){
+      console.error(e);
+      alert('Could not read that JSON file.');
+      input.value='';
+    }
+  };
+  reader.readAsText(file);
 }
-function importFallback(input){
-  const file=input.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ state={version:VERSION,updatedAt:new Date().toISOString(),dailyTarget:DAILY_TARGET,lessons:JSON.parse(reader.result).lessons||{}}; for(const l of lessons) lessonState(l.n); renderAll(); scheduleSave(); setSaveState('Imported · '+file.name); }catch(e){ alert('Could not read that JSON file.'); } }; reader.readAsText(file);
-}
-
+function triggerImport(){ document.getElementById('jsonImportInput').click(); }
 function updateLessonStatus(id,status){
   const s=lessonState(id); s.status=status;
   if(status==='completed'){
@@ -416,19 +423,30 @@ function renderReviews(){
   root.querySelectorAll('[data-review-toggle]').forEach(x=>x.onclick=()=>{const [id,key]=x.dataset.reviewToggle.split('|'); markReviewDone(id,key);});
 }
 function renderStorage(){
-  const supported=!!window.showOpenFilePicker && !!window.showSaveFilePicker; const fname=fileHandle?.name||savedFileName()||'No file selected';
-  document.getElementById('storageRoot').innerHTML=`<div class="grid two"><div class="card panel"><div class="panel-header"><div class="panel-title">Current JSON file</div><span class="chip ${fileHandle?'core':'secondary'}">${fileHandle?'Connected':'Not connected'}</span></div><div style="font-size:14px;font-weight:800;margin-bottom:6px">${escapeHtml(fname)}</div><div class="muted">The browser does not expose the full local filesystem path to web apps. This app stores the file handle in IndexedDB and the last file name in localStorage.</div><div class="modal-actions" style="justify-content:flex-start"><button class="btn primary" id="storageCreate">Create / Save JSON</button><button class="btn" id="storageOpen">Open JSON</button><button class="btn" id="storageExport">Export copy</button><label class="btn" style="display:inline-flex;align-items:center">Import copy<input id="storageImport" type="file" accept="application/json,.json" hidden></label></div></div><div class="card panel"><div class="panel-header"><div class="panel-title">What is stored?</div></div><div class="muted" style="line-height:1.7"><strong style="color:var(--text)">Lesson status</strong><br>not-started / in-progress / completed<br><br><strong style="color:var(--text)">Completion date</strong><br>saved when a lesson becomes completed<br><br><strong style="color:var(--text)">Review schedule</strong><br>Day 2, Day 7, Day 30<br><br><strong style="color:var(--text)">Daily target</strong><br>3 lessons minimum</div></div></div>${supported?'':'<div class="notice warn" style="margin-top:14px">File System Access API is not available in this current origin/browser. For persistent file handles, open this single HTML file through a local server such as <span class="kbd">http://localhost</span> in Chrome or Edge.</div>'}`;
-  document.getElementById('storageCreate').onclick=()=>chooseSaveFile().catch(e=>{console.error(e);setSaveState('Create cancelled');});
-  document.getElementById('storageOpen').onclick=()=>chooseOpenFile().catch(e=>{console.error(e);alert(e.message||'Could not open file.');});
-  document.getElementById('storageExport').onclick=exportFallback;
-  document.getElementById('storageImport').onchange=e=>importFallback(e.target);
+  let savedAt='Not saved yet';
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){ const parsed=JSON.parse(raw); savedAt=parsed.updatedAt?fmtDate(parsed.updatedAt.slice(0,10))+' · '+new Date(parsed.updatedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'Saved'; }
+  }catch(e){ console.warn(e); }
+  document.getElementById('storageRoot').innerHTML=`<div class="grid two"><div class="card panel"><div class="panel-header"><div class="panel-title">Browser localStorage</div><span class="chip core">Automatic</span></div><div style="font-size:14px;font-weight:800;margin-bottom:6px">Progress is stored locally in this browser</div><div class="muted">Every status change and review update is automatically persisted. Nothing is written to a separate progress file unless you explicitly export JSON.</div><div class="modal-actions" style="justify-content:flex-start"><button class="btn primary" id="storageExport">Export JSON</button><button class="btn" id="storageImportBtn">Import JSON</button></div><div class="notice info" style="margin-top:14px;margin-bottom:0">Last local save: <strong>${escapeHtml(savedAt)}</strong></div></div><div class="card panel"><div class="panel-header"><div class="panel-title">What is stored?</div></div><div class="muted" style="line-height:1.7"><strong style="color:var(--text)">Lesson status</strong><br>not-started / in-progress / completed<br><br><strong style="color:var(--text)">Completion date</strong><br>saved when a lesson becomes completed<br><br><strong style="color:var(--text)">Review schedule</strong><br>Day 2, Day 7, Day 30<br><br><strong style="color:var(--text)">Daily target</strong><br>3 lessons minimum<br><br><strong style="color:var(--text)">Backup</strong><br>Export or import the complete state as JSON</div></div></div>`;
+  document.getElementById('storageExport').onclick=exportJson;
+  document.getElementById('storageImportBtn').onclick=triggerImport;
+  document.getElementById('jsonImportInput').onchange=e=>importJsonFromInput(e.target);
 }
 function showStorageNotice(msg,type='info'){document.getElementById('fileNotice').innerHTML=`<div class="notice ${type}">${escapeHtml(msg)}</div>`;}
 function renderFileNotice(){
-  const name=fileHandle?.name||savedFileName();
-  if(name){ document.getElementById('fileNotice').innerHTML=`<div class="notice good">Progress file: <strong>${escapeHtml(name)}</strong>. Changes auto-save after a short delay.</div>`; }
-  else if(!(window.showOpenFilePicker&&window.showSaveFilePicker)){ document.getElementById('fileNotice').innerHTML='<div class="notice warn">The browser File System Access API is unavailable here. The checklist still works, but automatic JSON-file persistence needs a secure local origin such as localhost.</div>'; }
-  else document.getElementById('fileNotice').innerHTML='<div class="notice info">Connect a JSON file once. The browser will keep the file handle in IndexedDB and the file name in localStorage so future launches can restore it when permission is still available.</div>';
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      let label='Saved locally';
+      try{ const parsed=JSON.parse(raw); if(parsed.updatedAt) label+=` · ${new Date(parsed.updatedAt).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}`; }catch(e){}
+      document.getElementById('fileNotice').innerHTML=`<div class="notice good">${escapeHtml(label)}. Your progress is stored in this browser's localStorage.</div>`;
+    } else {
+      document.getElementById('fileNotice').innerHTML='<div class="notice info">Progress auto-saves to localStorage. Use Export JSON to create a portable backup, or Import JSON to restore one.</div>';
+    }
+  }catch(e){
+    document.getElementById('fileNotice').innerHTML='<div class="notice danger">localStorage is unavailable in this browser context. Import/export JSON can still be used for manual backups.</div>';
+  }
 }
 
 function openLesson(id){ openedLessonId=id; const l=lessonById[id], s=lessonState(id); document.getElementById('drawerTitle').textContent=`${l.n} · ${l.title}`; const reviews=lessonReviewEntries(l); document.getElementById('drawerBody').innerHTML=`<div class="chips"><span class="chip ${tierClass(l.tier)}">${escapeHtml(l.tier)}</span><span class="chip">${escapeHtml(l.t)}</span><span class="chip">${statusLabel(s.status)}</span></div><div style="margin-top:14px"><p style="margin:0">${escapeHtml(l.summary)}</p></div><div class="section"><div class="panel-title" style="margin-bottom:8px">Associated article links</div>${l.links.map(x=>`<div class="link-row"><span>${escapeHtml(x[0])}</span><a href="${x[1]}" target="_blank" rel="noopener noreferrer">Open ↗</a></div>`).join('')}</div><div class="section"><div class="panel-title" style="margin-bottom:8px">ChatGPT map</div><div class="link-row"><span>Curriculum source map</span><a href="${CHATGPT_MAP}" target="_blank" rel="noopener noreferrer">Open map ↗</a></div></div><div class="section"><div class="panel-title" style="margin-bottom:8px">Progress</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select class="field" id="drawerStatus"><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="completed">Completed</option></select><button class="btn primary" id="drawerSaveStatus">Save status</button></div><div class="muted" style="margin-top:8px">${s.completedAt?`Completed ${fmtDate(s.completedAt)}`:'Completion date will be recorded when marked completed.'}</div></div>${reviews.length?`<div class="section"><div class="panel-title" style="margin-bottom:8px">Review schedule</div><table class="review-table"><thead><tr><th>Review</th><th>Due</th><th>State</th><th></th></tr></thead><tbody>${reviews.map(r=>`<tr><td>${r.label}</td><td>${fmtDate(r.due)}</td><td>${r.doneAt?'Done':isReviewDue(r)?'Due':'Upcoming'}</td><td><button class="btn small ${r.doneAt?'':'primary'}" data-drawer-review="${r.key}">${r.doneAt?'Undo':'Mark reviewed'}</button></td></tr>`).join('')}</tbody></table></div>`:''}`;
@@ -439,18 +457,19 @@ function closeLesson(){ document.getElementById('drawer').classList.remove('open
 function renderAll(){ renderNav(); renderCurriculum(); renderDashboard(); renderReviews(); renderStorage(); renderFileNotice(); }
 
 /* UI */
-document.getElementById('openFileBtn').onclick=()=>chooseOpenFile().catch(e=>{if(e?.name!=='AbortError') alert(e.message||'Could not open file.');});
-document.getElementById('createFileBtn').onclick=()=>chooseSaveFile().catch(e=>{if(e?.name!=='AbortError') alert(e.message||'Could not create file.');});
+document.getElementById('importJsonBtn').onclick=triggerImport;
+document.getElementById('exportJsonBtn').onclick=exportJson;
+
 document.getElementById('searchInput').addEventListener('input',renderCurriculum);
 ['trackFilter','tierFilter','statusFilter','reviewFilter'].forEach(id=>document.getElementById(id).addEventListener('change',renderCurriculum));
 document.getElementById('drawerClose').onclick=closeLesson; document.getElementById('drawerBackdrop').onclick=closeLesson; document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLesson();closeModal();}});
 document.getElementById('openReviewBtn').onclick=()=>switchView('reviews');
 for(const t of trackOrder){ const o=document.createElement('option'); o.value=t;o.textContent=t;document.getElementById('trackFilter').appendChild(o); }
 
-/* Restore file handle after first render. */
+/* Restore saved progress after first render. */
 for(const l of lessons) lessonState(l.n);
+restoreLocalState();
 renderAll();
-restoreSavedHandle();
 </script>
 </body>
 </html>
